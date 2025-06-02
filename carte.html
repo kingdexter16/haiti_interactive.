@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cartographie d'Haiti</title>
+  <link rel="icon" type="image/png" href="h.JPEG">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: rgb(175, 214, 250);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      color: darkblue;
+      margin-bottom: 10px;
+    }
+
+    .container {
+      display: flex;
+      justify-content: flex-end; 
+      max-width: calc(100vw - 360px);
+      margin: 0 auto;
+    }
+
+    .carte-container {
+      position: relative;
+      max-width: 800px;
+      width: 100%;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .carte-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+      position: relative;
+      z-index: 0; 
+    }
+
+    .label {
+      position: absolute;
+      color: red;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+      background: none;
+      user-select: none;
+      z-index: 2; 
+      text-shadow: 1px 1px 2px white; 
+    }
+
+    #info {
+      position: fixed;
+      top: 30%;
+      left: 20px;
+      transform: translateY(-50%);
+      width: 320px;
+      background-color: #fff;
+      border: 2px solid #333;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      color: #000;
+      font-size: 16px;
+      z-index: 10;
+      display: none;
+      max-height: 90vh;
+  overflow-y: auto; 
+    }
+
+    #info h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    .subtitles {
+      margin-top: 10px;
+    }
+
+    .subtitle {
+      font-weight: bold;
+      color: blue;
+      cursor: pointer;
+      margin: 5px 0;
+      text-decoration: underline;
+    }
+
+    .detail {
+      margin-top: 10px;
+    }
+.category-title {
+  font-weight: bold;
+  margin-top: 10px;
+  cursor: pointer;
+  color: #003366;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-title:hover {
+  text-decoration: underline;
+}
+
+.arrow {
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+.category-content {
+  margin: 5px 0 10px 20px;
+  font-size: 14px;
+  color: #222;
+  word-wrap: break-word;
+}
+
+  </style>
+</head>
+<body>
+
+  <h1>Carte interactive d'Haïti</h1>
+
+  <div class="container">
+    <div class="carte-container">
+      <img src="Haiti.png" alt="Carte d'Haïti" />
+      <div class="label" style="top: 37%; left: 63%;" onclick="showInfo('Artibonite')">Artibonite</div>
+      <div class="label" style="top: 81%; left: 28%;" onclick="showInfo('Sud')">Sud</div>
+      <div class="label" style="top: 26%; left: 74%;" onclick="showInfo('Nord')">Nord</div>
+      <div class="label" style="top: 70%; left: 75%;" onclick="showInfo('Ouest')">Ouest</div>
+      <div class="label" style="top: 72%; left: 9%;" onclick="showInfo('Grande-Anse')">Grande-Anse</div>
+      <div class="label" style="top: 75%; left: 37%;" onclick="showInfo('Nippes')">Nippes</div>
+      <div class="label" style="top: 29%; left: 84%;" onclick="showInfo('Nord-Est')">Nord-Est</div>
+      <div class="label" style="top: 15%; left: 46%;" onclick="showInfo('Nord-Ouest')">Nord-Ouest</div>
+      <div class="label" style="top: 82%; left: 70%;" onclick="showInfo('Sud-Est')">Sud-Est</div>
+      <div class="label" style="top: 51%; left: 80%;" onclick="showInfo('Centre')">Centre</div>
+    </div>
+  </div>
+
+  <div id="info">
+    <h2>Informations</h2>
+    <div id="subtitles" class="subtitles"></div>
+    <div id="detail" class="detail"></div>
+  </div>
+
+  <script>
+ const infos = {
+  'Artibonite': {
+  'couleur': '#fff47d',
+  'Événements politiques': `
+L’Artibonite a été au cœur de plusieurs insurrections paysannes et luttes pour la démocratie.
+<br><br>
+- 1er janvier 1804 : Proclamation de l’indépendance à Gonaïves par Jean-Jacques Dessalines.<br>
+- 1791–1803 : Combats entre troupes françaises et insurgés à Marchand-Dessalines et Saint-Marc.<br>
+- 1946 : Révolte paysanne menée par Jean-Baptiste Perrier près de Saint-Marc.<br>
+- 1994 : Massacre de Raboteau aux Gonaïves contre des partisans d'Aristide.
+`,
+  'Ressources naturelles': `
+La rivière Artibonite est essentielle pour l’irrigation.
+<br><br>
+- riz (plus grande plaine rizicole du pays), maïs, pois, canne à sucre.<br>
+- maraîchage, fruits tropicaux (mangue, papaye), élevage.
+`,
+  'Nature sismique': `
+    Le département de l'Artibonite est une zone sismiquement active, bien que le niveau d'alerte actuel soit faible.
+    <br><br>
+    <strong>Historique sismique :</strong><br>
+    - Touché par le séisme de 2010, avec des dégâts considérables dans certaines zones.<br>
+    - En octobre 2018, un séisme a causé plusieurs blessures et des dommages matériels.<br>
+    - Le 15 novembre 2023, un séisme de magnitude 4.2 a été enregistré près de Saint-Michel-de-l'Attalaye.
+    <br><br>
+    <strong>Failles géologiques :</strong><br>
+    - Proximité avec des failles majeures comme la faille de la Presqu'île du Sud et la faille septentrionale.<br>
+    - Plusieurs failles locales non nommées traversent la région.
+    <br><br>
+    <strong>Reconstruction :</strong><br>
+    - Reconstruction partielle après 2010, mais certaines zones restent vulnérables.<br>
+    - Défis persistants liés à l'infrastructure et aux logements durables.
+  `
+},
+
+  'Sud': {
+  'couleur': '#fdf2aa',
+  'Événements politiques': `
+Région aux traditions de résistance et d’appui aux luttes extérieures.
+<br><br>
+- 1816 : Départ de Simón Bolívar depuis Les Cayes avec soutien haïtien.<br>
+- 1929 : Massacre des Cayes par les troupes américaines.<br>
+- XXe siècle : Révoltes paysannes et sociales fréquentes.<br>
+- 2016 : Dévastation par l’ouragan Matthew.
+`,
+  'Ressources naturelles': `
+Richesse en plages, forêts, caféiers.<br>
+Produits : café, cacao, bananes, ignames, poisson (pêche côtière).<br>
+Ressources forestières : bois, plantes médicinales.
+`,
+  'Nature sismique': `
+    Le département du Sud est une zone à risque sismique élevé, notamment à cause de la faille de la presqu'île du Sud qui traverse la région d’ouest en est.
+    <br><br>
+    <strong>Risque sismique :</strong><br>
+    - Risque modéré mais significatif, avec environ 10% de probabilité d’un séisme dommageable en 50 ans (ThinkHazard).<br>
+    - Activité sismique accrue depuis le séisme de 2021.
+    <br><br>
+    <strong>Séismes majeurs :</strong><br>
+    - <strong>14 août 2021 :</strong> séisme de magnitude 7,2 ayant causé plus de 2 200 morts, 13 000 blessés, et la destruction de 130 000 maisons.<br>
+    - <strong>Juin 2023 :</strong> séisme de magnitude 5,5 avec des victimes et des dégâts supplémentaires.
+    <br><br>
+    <strong>Failles géologiques :</strong><br>
+    - Faille de la Presqu'île du Sud (principale, active, de type décrochement dextre).<br>
+    - Faille Nord-Grand'Anse-Nippes présente également dans le secteur nord de la région.<br>
+    - Région située à la jonction des plaques Caraïbes et Amérique du Nord.
+    <br><br>
+    <strong>Activité sismique :</strong><br>
+    - Plus de 2800 séismes enregistrés entre août 2021 et mai 2023 (AlterPresse).<br>
+    - 409 séismes dans le Sud entre août 2021 et mai 2023.
+    <br><br>
+    <strong>Reconstruction :</strong><br>
+    - Infrastructures publiques (écoles, hôpitaux) en cours de reconstruction, mais logements précaires pour de nombreux déplacés.<br>
+    - Nécessité urgente de normes de construction parasismiques.<br>
+    - Reconstruction lente à cause du manque de ressources et des catastrophes naturelles successives (ex. ouragan Matthew en 2016).
+    <br><br>
+    <strong>Prévention :</strong><br>
+    - Sensibilisation accrue aux risques sismiques.<br>
+    - Nécessité de renforcer les capacités locales en matière de réponse aux catastrophes.
+  `
+},
+
+  'Nord': {
+  'couleur': '#f8cc88',
+ 'Événements politiques': `
+Berceau de la révolution haïtienne, le Nord a marqué l’histoire nationale.
+<br><br>
+- 1791 : Révolte des esclaves à Bois Caïman, Plaine du Nord.<br>
+- 1802–1803 : Batailles majeures au Cap-Haïtien, notamment à Vertières.<br>
+- 1811 : Fondation du Royaume d’Haïti par Henri Christophe.<br>
+- 1820 : Suicide de Christophe à la Citadelle Laferrière.<br>
+- 1904 : Célébration du centenaire à Cap-Haïtien.<br>
+- 1915–1934 : Résistance à l’occupation américaine menée par Charlemagne Péralte.<br>
+- Patrimoine historique : Citadelle Laferrière, Palais Sans-Souci.
+`,
+ 'Ressources naturelles': `
+Montagnes, rivières.<br>
+Produits : café, canne à sucre, fruits tropicaux (mangue, orange), cacao.<br>
+Ressources minières : bauxite, cuivre (potentiel).
+`,
+  'Nature sismique': `
+    Le département du Nord est une zone à risque sismique élevé à cause de la faille septentrionale.
+    <br><br>
+    <strong>Failles majeures :</strong><br>
+    - Faille septentrionale : traverse tout le Grand Nord et cause des séismes importants.<br>
+    - Autres failles secondaires présentes dans la région.
+    <br><br>
+    <strong>Historique sismique :</strong><br>
+    - Séismes majeurs en 2010 et 2021, avec pertes humaines et destructions.<br>
+    - Répliques régulières, même dans les zones frontalières.
+    <br><br>
+    <strong>Impact et reconstruction :</strong><br>
+    - Reconstructions partielles (écoles, hôpitaux, administrations).<br>
+    - Relogement précaire en périphérie des villes.<br>
+    - Besoins persistants en soins, logement, éducation.
+    <br><br>
+    <strong>Prévention et PNUD :</strong><br>
+    - Plan de prévention sismique mis en œuvre par le PNUD pour le Grand Nord.<br>
+    - Préparation aux séismes et tsunamis.
+    <br><br>
+    <strong>Vitesse tectonique :</strong><br>
+    - Mouvement estimé à 7-8 mm/an selon GPS et modélisation.<br>
+    - Spécifique à la faille septentrionale.
+  `
+},
+ 'Ouest': {
+  'couleur': '#b9e88d',
+  'Événements politiques': `
+Centre névralgique du pouvoir et des révoltes urbaines d’Haïti.
+<br><br>
+- 1804 : Jean-Jacques Dessalines s’installe à Port-au-Prince après la proclamation de l’indépendance.<br>
+- 1806 : Assassinat de Dessalines à Pont-Rouge, Port-au-Prince.<br>
+- 1963 : Massacre du 26 avril orchestré par François Duvalier.<br>
+- 1986 : Chute de Jean-Claude Duvalier à la suite d’un soulèvement populaire.<br>
+- 1990 : Élection de Jean-Bertrand Aristide.<br>
+- 1991 : Coup d'État militaire contre Aristide, suivi de son retour en 1994.<br>
+- 2010 : Séisme dévastateur, surtout à Port-au-Prince.<br>
+- 2018 : Mouvements PetroCaribe déclenchés dans la capitale.<br>
+- 2021 : Assassinat du président Jovenel Moïse à Pétion-Ville.
+`,
+  'Ressources naturelles': `
+Baie de Port-au-Prince.<br>
+Produits : maraîchage (tomate, chou, carotte), fruits (avocat, mangue), pêche maritime.<br>
+Exploitation de sable, gravier, carrières.
+`,
+  'Nature sismique': `
+    Le département de l'Ouest est un département à risque sismique élevé, étant l'un des plus touchés par ces événements en Haïti. 
+
+    <br><br>
+    <strong>Séismes majeurs :</strong><br>
+    - Séisme de 2010 (magnitude 7,0) : frappe majeure, causant plus de 200 000 morts et dévastant Port-au-Prince.<br>
+    - Séisme de 2021 (magnitude 7,2) : bien que principalement impactant les Nippes et la Grand'Anse, a également affecté l'Ouest.<br>
+    - Séisme du 15 novembre 2023 : de moindre magnitude mais ressenti dans plusieurs départements dont l'Ouest.
+    
+    <br><br>
+    <strong>Failles géologiques :</strong><br>
+    - Faille d'Enriquillo-Plantain Garden : traverse la partie sud d'Haïti jusqu’en Jamaïque, responsable de nombreux séismes.<br>
+    - Faille de Léogâne : locale, a joué un rôle dans le séisme de 2010.<br>
+    - Faille septentrionale : affecte le nord du pays.
+    
+    <br><br>
+    <strong>Autres risques naturels :</strong><br>
+    - Ouragans, inondations et glissements de terrain menacent aussi le département.<br>
+    
+    <br><br>
+    <strong>Impact et reconstruction :</strong><br>
+    - Reconstruction partielle des infrastructures publiques après 2010.<br>
+    - Défis persistants concernant le relogement durable et normes parasismiques.
+  `
+},
+
+  'Grande-Anse': {
+  'couleur': '#dabcf4',
+  'Événements politiques': `
+Terre d’intellectuels mais aussi de répression brutale.
+<br><br>
+- Jérémie : Ville natale de nombreux poètes et figures politiques.<br>
+- 1964 : Massacre de Jérémie, aussi appelé "Vêpres jérémiennes", sous François Duvalier.
+`,
+ 'Ressources naturelles': `
+Cacao, forêts tropicales.<br>
+Produits : café, ignames, patates, arbres fruitiers.<br>
+Pêche côtière, ressources forestières importantes.
+`,
+  'Nature sismique': `
+    La Grand'Anse est une zone à risque sismique important, située sur la faille Nord-Grand'Anse-Nippes.
+
+    <br><br>
+    <strong>Activité sismique :</strong><br>
+    - De nombreux séismes enregistrés, particulièrement après celui de 2021.<br>
+    - Risque de tsunami en cas de séisme majeur en mer.
+
+    <br><br>
+    <strong>Séisme du 14 août 2021 :</strong><br>
+    - Magnitude 7,2.<br>
+    - Plus de 2 200 morts, 12 000 blessés.<br>
+    - Importantes destructions.
+
+    <br><br>
+    <strong>Failles principales :</strong><br>
+    - Faille Enriquillo-Plantain Garden (EPGF) : la plus importante, responsable du séisme de 2010.<br>
+    - Faille de la presqu'île du Sud.<br>
+    - Autres failles locales moins documentées.
+
+    <br><br>
+    <strong>Impact et reconstruction :</strong><br>
+    - Dommages considérables lors du séisme de 2010.<br>
+    - Efforts de reconstruction lent et complexe.
+  `
+},
+
+  'Nippes': {
+  'couleur': '#f9d7aa',
+  'Événements politiques': `
+Jeune département au passé révolutionnaire.
+<br><br>
+- 1791–1804 : Zones actives durant la Révolution haïtienne.<br>
+- 2003 : Création du département, détaché du Sud.<br>
+- 2021 : Épicentre du séisme à Petit-Trou-de-Nippes.
+`,
+ 'Ressources naturelles': `
+Zones agricoles fertiles.<br>
+Produits : maïs, haricot, pois, fruits tropicaux, petit élevage (chèvres, porcs).<br>
+Rivières et vallées productives.
+`,
+  'Nature sismique': `
+    Le département des Nippes est un département à risque sismique, ayant été touché par plusieurs séismes, notamment celui de magnitude 7,2 en 2021.
+
+    <br><br>
+    <strong>Séisme du 14 août 2021 :</strong><br>
+    - Magnitude 7,2 à 08:29 du matin.<br>
+    - Épicentre situé à 12 km au Nord-Est de Saint-Louis du Sud.<br>
+    - Nombreuses destructions et victimes dans les Nippes et départements voisins.
+
+    <br><br>
+    <strong>Failles majeures :</strong><br>
+    - Faille Nord-Grand'Anse-Nippes : activité sismique importante au nord de Jérémie.<br>
+    - Faille Nord Hispaniola (FNH).<br>
+    - Faille septentrionale (FS).<br>
+    - Faille Enriquillo-Plantain Garden (FEPG).<br>
+    - Failles secondaires comme la faille des Matheux (FM) et la faille Nord Grand'Anse Nippes (FNGAN).
+
+    <br><br>
+    <strong>Reconstruction :</strong><br>
+    - Soutien de la MINUSTAH pour réhabilitation des structures comme le commissariat de Petit Trou.<br>
+    - Projets pour améliorer conditions de travail et création d’emplois.
+  `
+},
+
+  'Nord-Est': {
+  'couleur': '#b8e3f1',
+  'Événements politiques': `
+Zone frontalière stratégique, souvent au cœur de tensions binationales.
+<br><br>
+- 1793 : Fort-Liberté, site stratégique pendant les guerres coloniales.<br>
+- Migration importante vers la République dominicaine via Ouanaminthe.<br>
+- Conflits frontaliers persistants avec la RD.
+`,
+ 'Ressources naturelles': `
+Terres agricoles, marais.<br>
+Produits : riz, canne à sucre, bananes, maïs.<br>
+Potentiel minier : or, cuivre (projets à Morne Bossa, La Miel).
+`,
+  'Nature sismique': `
+    Département à haut risque sismique, situé sur la faille septentrionale.
+    <br><br>
+    <strong>Vulnérabilité :</strong><br>
+    - Forte exposition sismique et possible risque de tsunami.<br>
+    - Études montrent qu’un séisme comme celui de 1842 causerait des destructions massives aujourd’hui.
+    <br><br>
+    <strong>Sismicité :</strong><br>
+    - Séismes de faibles à moyennes magnitudes enregistrés.<br>
+    - Vulnérabilité amplifiée par la faible qualité des constructions et le manque de préparation.
+    <br><br>
+    <strong>Failles :</strong><br>
+    - Traversé par la faille septentrionale (majeure et active).
+    <br><br>
+    <strong>Reconstruction :</strong><br>
+    - Projets de reconstruction en cours, mais majorité des déplacés vivent toujours en situation précaire.
+  `
+},
+ 'Nord-Ouest': {
+  'couleur': '#d5f58c',
+  'Événements politiques': `
+Département souvent marginalisé mais riche en actes de rébellion.
+<br><br>
+- 1793 : Port-de-Paix, centre de révolte contre les colons français.<br>
+- Années 1930 & 1990 : Activisme régional contre le pouvoir central.<br>
+- Grande-Rivière du Nord, parfois rattachée ici, revendiquée comme lieu de naissance de Dessalines.
+`,
+ 'Ressources naturelles': `
+Salines, pêche.<br>
+Produits : sorgho, pois, mil, fruits secs (pistaches), coton (anciennement).<br>
+Ressources halieutiques : poisson, langouste.
+`,
+  'Nature sismique': `
+    Zone à risque sismique modéré, avec 10% de probabilité d’un séisme dommageable en 50 ans.
+    <br><br>
+    <strong>Historique sismique :</strong><br>
+    - Séisme de magnitude 5,9 en 2018 à Port-de-Paix (12 morts, nombreux dégâts).<br>
+    - Séismes de 2010 et 2021 ressentis mais moins directement touché.
+    <br><br>
+    <strong>Failles géologiques :</strong><br>
+    - Faille septentrionale : passe entre l’île de la Tortue et le Môle Saint-Nicolas.<br>
+    - Faille Enriquillo-Plantain Garden également présente.<br>
+    - Zone tectonique active.
+    <br><br>
+    <strong>Reconstructions :</strong><br>
+    - Écoles, hôpitaux partiellement reconstruits.<br>
+    - Majorité des déplacés vivent en bidonvilles.
+    <br><br>
+    <strong>Mouvement tectonique :</strong><br>
+    - Plaques en convergence lente (quelques cm/an), vitesse exacte inconnue pour le Nord-Ouest.
+  `
+},
+
+  'Sud-Est': {
+  'couleur': '#cde8f9',
+  'Événements politiques': `
+Jacmel, bastion culturel et foyer de luttes régionales et transnationales.
+<br><br>
+- 1791–1800 : Lieu stratégique pendant la Révolution haïtienne.<br>
+- 1806 : Francisco de Miranda y crée le drapeau vénézuélien.<br>
+- XIXe siècle : Accueil de révolutionnaires latino-américains.<br>
+- Massacre du Persil à la frontière (Thiotte).<br>
+- Ville fondatrice du carnaval haïtien moderne.
+`,
+ 'Ressources naturelles': `
+Montagnes, bassins versants.<br>
+Produits : café, haricot, maïs, manioc, bananes, pêche.<br>
+Artisanat et pierres ornementales (granit, calcaire).
+`,
+  'Nature sismique': `
+    Le département du Sud-Est est situé sur la trajectoire de la faille Enriquillo-Plantain Garden (EPGF), une des plus actives d’Haïti, rendant cette zone vulnérable aux séismes.
+    <br><br>
+    <strong>Risque sismique :</strong><br>
+    - Zone à risque élevé en raison de sa proximité avec la faille EPGF.<br>
+    - Probabilité importante de tremblements de terre modérés à forts dans les décennies à venir.
+    <br><br>
+    <strong>Failles géologiques :</strong><br>
+    - Faille Enriquillo-Plantain Garden traverse le département.<br>
+    - Cette faille a été responsable du séisme majeur de 2010 et demeure active.
+    <br><br>
+    <strong>Séismes historiques :</strong><br>
+    - Proche de l’épicentre du séisme du 12 janvier 2010 (magnitude 7.0) qui a touché Port-au-Prince et ses environs.<br>
+    - Des secousses ressenties régulièrement dans la région depuis.
+    <br><br>
+    <strong>Vulnérabilité :</strong><br>
+    - Bâtiments souvent construits sans normes parasismiques.<br>
+    - Routes de montagne sujettes à glissements de terrain lors de secousses.<br>
+    - Zones rurales isolées avec peu d’accès à l’aide d’urgence.
+    <br><br>
+    <strong>Prévention :</strong><br>
+    - Besoin urgent de sensibilisation communautaire.<br>
+    - Programmes de reconstruction sécurisée limités malgré la mémoire du séisme de 2010.<br>
+    - Projets d’éducation sur les risques naturels en cours avec l’appui de la société civile.
+  `
+},
+
+ 'Centre': {
+  'couleur': '#e6bdf4',
+  'Événements politiques': `
+Région charnière entre le nord et le sud du pays.
+<br><br>
+- 1791–1804 : Soulèvements d’esclaves et affrontements révolutionnaires.<br>
+- 1956 : Construction du barrage hydroélectrique de Péligre.<br>
+- Fortes migrations rurales et débats sur l’aménagement du territoire.
+`,
+  'Ressources naturelles': `
+Bassin de l’Artibonite supérieure, montagnes.<br>
+Produits : maïs, sorgho, pois, maraîchage, fruits tropicaux.<br>
+Élevage important (chèvres, porcs, bœufs).
+`,
+  'Nature sismique': `
+    Le département du Centre est exposé à un risque sismique modéré, bien qu’il ait été relativement épargné par les séismes les plus destructeurs.
+    <br><br>
+    <strong>Historique sismique :</strong><br>
+    - Séisme de 2010 (magnitude 7,3) ressenti dans le Centre malgré un épicentre situé dans l’Ouest.<br>
+    - Séisme de 2021 (magnitude 7,2) fortement ressenti dans la région avec certains dégâts.
+    <br><br>
+    <strong>Failles géologiques :</strong><br>
+    - Faille Enriquillo-Plantain Garden (EPGF) : transformante majeure, origine du séisme de 2010.<br>
+    - Zone de Faille Septentrionale (ZFS) : traverse également le Centre.<br>
+    - Zone de Faille de La Española (ZFLE) : autre faille significative dans la région.
+    <br><br>
+    <strong>Reconstruction :</strong><br>
+    - Infrastructures publiques partiellement reconstruites selon les normes parasismiques.<br>
+    - Défis persistants : relogement précaire, épidémie de choléra, accès aux services essentiels.
+  `
+},
+
+};
+
+    let closeTimeout;
+
+    function showInfo(nom) {
+  const infoBox = document.getElementById('info');
+  const data = infos[nom];
+
+  if (!data) {
+    infoBox.innerHTML = `<h2>${nom}</h2><p>Information non disponible.</p>`;
+    return;
+  }
+
+  // Appliquer la couleur du département au fond du tableau
+  const bgColor = data.couleur || '#ffffff'; // fallback blanc si pas défini
+  infoBox.style.backgroundColor = bgColor;
+
+  // Générer le contenu HTML
+  let html = `<h2>${nom}</h2>`;
+  for (let category in data) {
+    if (category === 'couleur') continue; // ignorer la propriété "couleur"
+    const id = `${nom}-${category}`.replace(/\s+/g, '-');
+    html += `
+      <div class="category">
+        <div class="category-title" onclick="toggleCategory('${id}', this)">
+          <span class="arrow">﹀</span> ${category}
+        </div>
+        <div class="category-content" id="${id}" style="display: none;">${data[category]}</div>
+      </div>
+    `;
+  }
+
+  infoBox.innerHTML = html;
+  infoBox.style.display = 'block';
+  startCloseTimer();
+}
+
+    function startCloseTimer() {
+      clearTimeout(closeTimeout);
+      closeTimeout = setTimeout(() => {
+        closeInfo();
+      }, 5000);
+    }
+
+    function closeInfo() {
+      const infoBox = document.getElementById('info');
+      infoBox.style.display = 'none';
+    }
+
+    const infoBox = document.getElementById('info');
+    infoBox.addEventListener('mouseenter', () => clearTimeout(closeTimeout));
+    infoBox.addEventListener('mouseleave', () => startCloseTimer());
+    infoBox.addEventListener('touchstart', () => clearTimeout(closeTimeout));
+    infoBox.addEventListener('touchend', () => startCloseTimer());
+    function toggleCategory(id, clickedTitle) {
+  const allContents = document.querySelectorAll('.category-content');
+  const allArrows = document.querySelectorAll('.category-title .arrow');
+
+  allContents.forEach(content => {
+    const isCurrent = content.id === id;
+    content.style.display = isCurrent && content.style.display === 'none' ? 'block' : 'none';
+  });
+
+  allArrows.forEach(arrow => {
+    arrow.textContent = '﹀';
+  });
+
+  const contentToToggle = document.getElementById(id);
+  const arrow = clickedTitle.querySelector('.arrow');
+  if (contentToToggle.style.display === 'block') {
+    arrow.textContent = '︿';
+  } else {
+    arrow.textContent = '﹀';
+  }
+}
+  </script>
+
+</body>
+</html>
